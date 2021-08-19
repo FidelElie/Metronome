@@ -1,11 +1,7 @@
 import React, { useEffect} from "react";
-import { usePresets } from "../../../lib/providers/Presets";
 
-const numberArray = (start, stop, step = 1) => {
-  return Array.from(
-    { length: (stop - start) / step + 1 }, (_, i) => (i * step) + start
-  );
-}
+import { numberArray } from "../../../lib/utiltiies";
+import { usePresets } from "../../../lib/providers/Presets";
 
 const Presets = (props) => {
   const { metronomeBPM, setMetronomeBPM } = props;
