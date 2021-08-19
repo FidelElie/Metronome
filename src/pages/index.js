@@ -2,13 +2,19 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import DrumStick from "../assets/drumstick.mp3";
 
-import accurateInvterval from "accurate-interval";
 import PresetProvider from "../lib/providers/Presets";
 
 import App from "../components/core/App";
 import Click from "../components/pages/index/Click";
 import Presets from "../components/pages/index/Presets";
 import Metronome from "../components/pages/index/Metronome";
+
+const beat = new Audio(DrumStick);
+
+const beatModes = {
+  click: { text: "Click", Component: Click },
+  presets: { text: "Presets", Component: Presets }
+}
 
 export default function Home() {
   const [metronomeMode, setMetronomeMode] = useState("click");
@@ -17,59 +23,62 @@ export default function Home() {
   const [metronomeRunning, setMetronomeRunning] = useState(false);
   const metronomeInterval = useRef(null);
 
-  const modes = {
-    click: {
-      text: "Click",
-      Component: Click,
-      props: { setMetronomeBPM }
-    },
-    presets: {
-      text: "Presets",
-      Component: Presets,
-      props: { metronomeBPM, setMetronomeBPM }
-    }
-  }
-  const currentMode = modes[metronomeMode];
+  const modeProps = { metronomeBPM, setMetronomeBPM };
 
-  const calculateInterval = useCallback(() => {
-    const beat = new Audio(DrumStick);
-    const playBeat = () => beat.play();
+  const currentMode = beatModes[metronomeMode];
 
+  const destroyInterval = useCallback(() => {
     if (metronomeInterval.current) {
-      metronomeInterval.current.clear();
+      clearInterval(metronomeInterval.current);
       metronomeInterval.current = null;
     }
+  }, []);
+
+  const calculateInterval = useCallback(() => {
+    const playBeat = () => beat.play();
+
+    // Destroy the Interval If One Is Already
+    destroyInterval();
 
     const beatsPerSecond = metronomeBPM / 60;
     if (beatsPerSecond !== 0) {
       const period = 1 / beatsPerSecond;
       if (metronomeRunning) {
         const beatInterval = period * 1000;
-        metronomeInterval.current = accurateInvterval(playBeat, beatInterval)
+        metronomeInterval.current = setInterval(playBeat, beatInterval);
       }
     } else {
-      metronomeInterval.current = null;
+      destroyInterval();
     }
-  }, [metronomeBPM, metronomeRunning]);
+  }, [metronomeBPM, metronomeRunning, destroyInterval]);
 
-  const toggleMetronome = () => {
+  const toggleMetronome = useCallback(() => {
     if (!metronomeRunning) {
       setMetronomeRunning(true);
       calculateInterval();
     } else {
       setMetronomeRunning(false);
-      metronomeInterval.current.clear();
-      metronomeInterval.current = null;
+      destroyInterval()
     }
-  }
+  }, [metronomeRunning, calculateInterval, destroyInterval]);
 
   useEffect(() => {
-    calculateInterval();
-  }, [metronomeBPM, calculateInterval])
+    window.addEventListener("keyup", (event) => {
+      switch (event.code) {
+        case "Space":
+          toggleMetronome();
+          break;
+        default:
+          break
+      }
+    });
+  }, [toggleMetronome]);
+
+  useEffect(() => { calculateInterval(); }, [metronomeBPM, calculateInterval]);
 
   return (
     <App>
-      <div className="w-5/6 text-center flex flex-col items-center">
+      <div className="w-full text-center flex flex-col items-center">
         <div className="w-min px-4 py-2 rounded-full shadow flex items-center">
           <span className="text-2xl mr-2">{ metronomeBPM }</span>
           <span className="font-semibold">BPM</span>
@@ -78,24 +87,27 @@ export default function Home() {
           <Metronome metronomeBPM={metronomeBPM} metronomeRunning={metronomeRunning}/>
         </div>
       </div>
-      <div className="flex flex-col w-5/6 items-center">
+      <div className="w-full flex flex-col items-center">
         <div className="flex items-center justify-center mb-3 md:mb-10">
           <button
-            className="rounded-full px-4 py-2 text-lg flex justify-center items-center shadow text-white bg-yellow-600 font-semibold"
+            className="rounded-md px-4 py-2 text-lg flex justify-center items-center shadow-lg text-white bg-yellow-600 font-semibold"
             onClick={toggleMetronome}
           >
             <span className="text-2xl material-icons md:text-4xl">
               { metronomeRunning ? "pause" : "play_arrow"}
             </span>
-            <span className="ml-1 text-sm md:text-base">
+            <span className="ml-3 text-sm md:text-base">
               { metronomeRunning ? "Stop" : "Start" } Metronome
+            </span>
+            <span className="ml-3 border-2 rounded-md text-sm px-2 py-1 bg-white text-black shadow-lg hidden lg:inline">
+              SPACE
             </span>
           </button>
         </div>
         <div className="flex flex-col flex-grow shadow rounded-md overflow-hidden md:w-1/2">
           <div className="flex w-full">
             {
-              Object.entries(modes).map(mode => (
+              Object.entries(beatModes).map(mode => (
                 <button
                   className={`flex-grow border-b px-3 py-2 font-semibold ${mode[0] === metronomeMode ? "bg-red-500 text-white" : ""} md:text-lg`}
                   onClick={() => setMetronomeMode(mode[0])}
@@ -108,7 +120,7 @@ export default function Home() {
           </div>
           <div className="flex w-full rounded-md items-center justify-center my-2 h-16">
             <PresetProvider>
-              <currentMode.Component {...(currentMode.props)} />
+              <currentMode.Component {...modeProps} />
             </PresetProvider>
           </div>
         </div>
