@@ -6,7 +6,7 @@ const Metronome = (props) => {
     <div className="h-full w-full flex items-end justify-center">
       <Body>
         <Ruler/>
-        <Head {...props}/>
+        <Pendulum {...props}/>
         <Base/>
       </Body>
     </div>
@@ -22,7 +22,7 @@ const Body = ({ children }) => (
   </div>
 )
 
-const Head = (props) => {
+const Pendulum = (props) => {
   const { metronomeBPM, metronomeRunning } = props;
 
   const springProps = useSpring({
@@ -46,7 +46,7 @@ const Head = (props) => {
 }
 
 const Base = () => (
-  <div className="transform absolute bottom-0 h-4 w-full bg-red-500 left-1/2 -translate-x-1/2"/>
+  <div className="transform absolute bottom-0 h-5 w-full bg-red-500 left-1/2 -translate-x-1/2"/>
 )
 
 const Ruler = () => (

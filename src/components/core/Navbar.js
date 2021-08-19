@@ -1,18 +1,19 @@
+import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Logo from "../../assets/logo.svg";
 
-const Navbar = () => {
+const Navbar = (props) => {
+  const { fixed } = props;
   const [pathname, setPathname] = useState(null);
 
   useEffect(() => {
     setPathname(window.location.pathname);
   }, []);
 
-
   return (
-    <div className="w-full fixed border-b">
+    <div className={`w-full border-b bg-white ${ fixed ? "fixed" : ""}`}>
       <div className="z-10 container mx-auto py-3 px-5">
         <div className="w-full flex justify-between items-center">
           <Link to="/">
@@ -40,5 +41,9 @@ const Navbar = () => {
     </div>
   )
 }
+
+Navbar.propTypes = { fixed: PropTypes.bool, }
+
+Navbar.defaultProps = { fixed: false, }
 
 export default Navbar;
