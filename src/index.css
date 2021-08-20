@@ -6,3 +6,7 @@
 a {
   @apply hover:text-red-500;
 }
+
+ul {
+  @apply space-y-2 list-disc;
+}
