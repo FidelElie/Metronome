@@ -1,7 +1,9 @@
 # MetroNome
 Keep The Beat
 
-Hosted At: [https://gallant-shirley-e36bac.netlify.app](https://gallant-shirley-e36bac.netlify.app);
+Hosted At: [https://metronome-beat.netlify.app](https://metronome-beat.netlify.app);
+
+App Information At: [https://metronome-beat.netlify.app/about](https://metronome-beat.netlify.app/about)
 
 ## Technology Stack
 
