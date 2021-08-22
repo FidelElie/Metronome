@@ -15,15 +15,25 @@ const bpmToMsPeriod = (bpm) => {
   return beatInterval;
 }
 
-const msPeriodToBPM = (deltaInMilliseconds, normaliseBPM = 220) => {
+const msPeriodToBPM = (
+  deltaInMilliseconds,
+  { lowerBoundBPM, upperboundBPM } = { lowerBoundBPM: 40, upperboundBPM: 220 }) => {
   // deltaInMilliseconds / (milisecondsInASecond * secondsInAMinute)
   const millisecondsInAMinute = deltaInMilliseconds / (1000 * 60);
   // beatsPerMinute = 1 minute / beatPerMinuteDelta
   const beatsPerMinute = Math.ceil(1 / millisecondsInAMinute);
-  // Normalise to a maximum of {nomaliseBPM} BPM
-  const normalised = beatsPerMinute <= normaliseBPM ? beatsPerMinute : normaliseBPM;
+  // Normalise BPM within range.
+  let normalisedBPM;
 
-  return normalised;
+  if (beatsPerMinute < lowerBoundBPM ) {
+    normalisedBPM = lowerBoundBPM;
+  } else if ( beatsPerMinute > upperboundBPM) {
+    normalisedBPM = upperboundBPM;
+  } else {
+    normalisedBPM = beatsPerMinute;
+  }
+
+  return normalisedBPM;
 }
 
 const joinClasses = (...classes) => {
